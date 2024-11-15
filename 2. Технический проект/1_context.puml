@@ -1,0 +1,26 @@
+@startuml C4. Контекст
+
+title C4. Контекст
+
+!include <C4/C4_Container>
+
+Person(admin, "Администратор", "Модерирует учётные записи, концерты и отзывы пользователей")
+Person(organizer, "Организатор", "Размещает и редактирует концерты, управляет продажами")
+Person(user, "Пользователь", "Бронирует места, посещает концерты, оставляет отзывы")
+
+System(concertSystem, "Система поиска и резервирования билетов на концерты")
+admin ---> concertSystem
+organizer ---> concertSystem
+user ---> concertSystem
+
+System_Ext(payment, "Платежная система", "Предоставление возможности оплаты")
+System_Ext(map, "Система картографии", "Предоставление адреса по координатам")
+System_Ext(email, "Email сервис", "Отправка уведомлений и билетов")
+System_Ext(socials, "Социальные сети", "Продвижение мероприятий и взаимодействие с пользователями")
+
+concertSystem ---> payment
+concertSystem ---> map
+concertSystem ---> email
+concertSystem ---> socials
+
+@enduml
