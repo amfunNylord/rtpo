@@ -1,0 +1,80 @@
+@startuml C4. Контейнеры
+
+title C4. Контейнеры
+
+!define C4P https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master
+!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
+!include $ICONURL/devicons/react.puml
+!include $ICONURL/devicons/postgresql.puml
+!include $ICONURL/devicons/netmagazine.puml
+
+!includeurl C4P/C4_Container.puml
+
+Person(admin, "Администратор", "Модерирует учётные записи, концерты и отзывы пользователей")
+Person(organizer, "Организатор", "Размещает и редактирует концерты, управляет продажами")
+Person(user, "Пользователь", "Бронирует места, посещает концерты, оставляет отзывы")
+
+System_Boundary(concert_system, "Система поиска и резервирования билетов на концерты") {
+    Container(web_app, "Мультистраниченое веб-приложение", "React", "", $sprite="react")
+    Container(database, "База данных", "PostgreSQL", "", $sprite="postgresql")
+    Container(user_service, "Сервис пользователей", "C#, .NET", "", $sprite="netmagazine")
+    Container(concert_service, "Сервис концертов", "C#, .NET", "", $sprite="netmagazine")
+    Container(booking_service, "Сервис бронирования", "C#, .NET", "", $sprite="netmagazine")
+    Container(payment_service, "Сервис платежей", "C#, .NET", "", $sprite="netmagazine")
+    Container(notification_service, "Сервис уведомлений", "C#, .NET", "", $sprite="netmagazine")
+    Container(analytics_service, "Сервис аналитики", "C#, .NET", "", $sprite="netmagazine")
+    Container(event_management_service, "Сервис управления событиями", "C#, .NET", "", $sprite="netmagazine")
+    Container(social_integration_service, "Сервис интеграции с социальными сетями", "C#, .NET", "", $sprite="netmagazine")
+    Container(auth_service, "Шлюз авторизации и аутентификации", "C#, .NET", "", $sprite="netmagazine")
+    Container(monitoring, "Система мониторинга")
+    Container(support_service, "Сервис техподдержки", "C#, .NET", "", $sprite="netmagazine")
+}
+
+System_Ext(payment_system, "Платежная система", "Предоставление возможности оплаты")
+System_Ext(map_system, "Система картографии", "Предоставление адреса по координатам")
+System_Ext(email_system, "Email сервис", "Отправка уведомлений и билетов")
+System_Ext(socials_system, "Социальные сети", "Продвижение мероприятий и взаимодействие с пользователями")
+
+Rel(admin, web_app, "Посещает", "HTTP")
+Rel(organizer, web_app, "Посещает", "HTTP")
+Rel(user, web_app, "Посещает", "HTTP")
+
+Rel(web_app, auth_service, "API вызовы", "REST API")
+Rel(web_app, map_system, "Получает данные по карте", "REST API")
+
+Rel(auth_service, user_service, "API вызовы", "REST API")
+Rel(auth_service, payment_service, "API вызовы", "REST API")
+Rel(auth_service, notification_service, "API вызовы", "REST API")
+Rel(auth_service, analytics_service, "API вызовы", "REST API")
+Rel(auth_service, concert_service, "API вызовы", "REST API")
+Rel(auth_service, support_service, "API вызовы", "REST API")
+Rel(auth_service, social_integration_service, "API вызовы", "REST API")
+Rel(auth_service, database, "Читает/Пишет данные", "ADO.NET")
+Rel(auth_service, email_system, "API вызовы", "REST API")
+
+Rel(analytics_service, database, "Читает/Пишет данные", "ADO.NET")
+
+Rel(notification_service, database, "Читает/Пишет данные", "ADO.NET")
+Rel(notification_service, email_system, "API вызовы", "REST API")
+Rel(notification_service, event_management_service, "API вызовы", "REST API")
+
+Rel(user_service, database, "Читает/Пишет данные", "ADO.NET")
+Rel(user_service, booking_service, "API вызовы", "REST API")
+
+Rel(concert_service, booking_service, "API вызовы", "REST API")
+Rel(concert_service, map_system, "Получает данные для отображения карты", "REST API")
+
+Rel(booking_service, payment_service, "API вызовы", "REST API")
+
+Rel(payment_service, payment_system, "API вызовы", "REST API")
+Rel(payment_service, notification_service, "API вызовы", "REST API")
+
+Rel(social_integration_service, socials_system, "API вызовы", "REST API")
+
+Rel(monitoring, auth_service, "Проверяет состояние", "REST API")
+Rel(monitoring, email_system, "API вызовы", "REST API")
+
+Rel(event_management_service, concert_service, "API вызовы", "REST API")
+Rel(support_service, notification_service, "API вызовы", "REST API")
+
+@enduml

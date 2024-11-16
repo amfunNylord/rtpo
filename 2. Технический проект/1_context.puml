@@ -8,19 +8,19 @@ Person(admin, "Администратор", "Модерирует учётные
 Person(organizer, "Организатор", "Размещает и редактирует концерты, управляет продажами")
 Person(user, "Пользователь", "Бронирует места, посещает концерты, оставляет отзывы")
 
-System(concertSystem, "Система поиска и резервирования билетов на концерты")
-admin ---> concertSystem
-organizer ---> concertSystem
-user ---> concertSystem
+System(concert_system, "Система поиска и резервирования билетов на концерты")
+admin ---> concert_system
+organizer ---> concert_system
+user ---> concert_system
 
-System_Ext(payment, "Платежная система", "Предоставление возможности оплаты")
-System_Ext(map, "Система картографии", "Предоставление адреса по координатам")
-System_Ext(email, "Email сервис", "Отправка уведомлений и билетов")
-System_Ext(socials, "Социальные сети", "Продвижение мероприятий и взаимодействие с пользователями")
+System_Ext(payment_system, "Платежная система", "Предоставление возможности оплаты")
+System_Ext(map_system, "Система картографии", "Предоставление адреса по координатам")
+System_Ext(email_system, "Email сервис", "Отправка уведомлений и билетов")
+System_Ext(socials_system, "Социальные сети", "Продвижение мероприятий и взаимодействие с пользователями")
 
-concertSystem ---> payment
-concertSystem ---> map
-concertSystem ---> email
-concertSystem ---> socials
+concert_system ---> payment_system
+concert_system ---> map_system
+concert_system ---> email_system
+concert_system ---> socials_system
 
 @enduml
