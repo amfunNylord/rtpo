@@ -1,0 +1,17 @@
+@startuml Диаграмма состояний
+    title Диаграмма состояний
+    top to bottom direction
+    hide empty description
+    skinparam nodesep 65
+    [*] --> Searching : Начало поиска мероприятий
+    Searching --> EventSelected : Выбрано мероприятие
+    EventSelected --> TicketsSelected : Выбор билетов
+    TicketsSelected --> Payment : Подтверждение выбора мест
+    Payment --> Invalid : Ошибка при обработке платежа
+    Payment --> Confirmation : Успешная оплата
+    Confirmation --> [*] : Бронирование завершено
+    Invalid --> [*] : Возврат к выбору билетов
+    EventSelected --> Canceled : Отмена выбора мероприятия
+    TicketsSelected --> Canceled : Отмена выбора билетов
+    Canceled --> [*] : Завершение процесса
+@enduml
