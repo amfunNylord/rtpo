@@ -5,7 +5,7 @@ title C4. Компонент
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
 !$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
 
-Component(concertMicroservice, "Микросервис концертов", "C# .NET", $sprite="")
+Component(concertMicroservice, "Клиент")
 
 System_Boundary(libAcc, "API") {
     Component(concertController, "ConcertController", "C# .NET", " отвечает за обработку входящих запросов")
@@ -16,10 +16,10 @@ System_Boundary(libAcc, "API") {
     Rel(concertService, concertRepository, "")
 }
 
-System_Ext(eventManagementService, "EventManagmentService", "Управляет событиями, связанными с концертами")
+Component(eventManagementService, "EventManagmentService", "C# .NET", "Управляет событиями, связанными с концертами")
 Rel(concertService, eventManagementService, "")
 
-System_Ext(notificationService, "NotificationService", "Отправляет уведомления пользователям о концертах")
+Component(notificationService, "NotificationService", "C# .NET", "Отправляет уведомления пользователям о концертах")
 Rel(concertService, notificationService, "")
 
 System_Ext(map_system, "Система картографии", "Предоставление адреса по координатам")

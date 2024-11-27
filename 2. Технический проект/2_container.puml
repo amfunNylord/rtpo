@@ -26,7 +26,6 @@ System_Boundary(concert_system, "Система поиска и резервир
     Container(event_management_service, "Сервис управления событиями", "C#, .NET", "", $sprite="netmagazine")
     Container(social_integration_service, "Сервис интеграции с социальными сетями", "C#, .NET", "", $sprite="netmagazine")
     Container(auth_service, "Шлюз авторизации и аутентификации", "C#, .NET", "", $sprite="netmagazine")
-    Container(monitoring, "Система мониторинга")
     Container(support_service, "Сервис техподдержки", "C#, .NET", "", $sprite="netmagazine")
 }
 
@@ -70,9 +69,6 @@ Rel(payment_service, payment_system, "API вызовы", "REST API")
 Rel(payment_service, notification_service, "API вызовы", "REST API")
 
 Rel(social_integration_service, socials_system, "API вызовы", "REST API")
-
-Rel(monitoring, auth_service, "Проверяет состояние", "REST API")
-Rel(monitoring, email_system, "API вызовы", "REST API")
 
 Rel(event_management_service, concert_service, "API вызовы", "REST API")
 Rel(support_service, notification_service, "API вызовы", "REST API")
