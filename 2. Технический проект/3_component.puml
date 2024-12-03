@@ -3,26 +3,37 @@
 title C4. Компонент
 
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
-!$ICONURL = "https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v3.0.0/icons"
 
-Component(concertMicroservice, "Клиент")
+System_Boundary(ConcertService_Boundary, "API Сервиса концертов") {
+    Component(concertController, "ConcertController", "C# .NET", "Обработка запросов")
+    Component(concertService, "ConcertService", "C# .NET", "Бизнес-логика")
+    Component(concertUseCase, "ConcertUseCase", "C# .NET", "Сценарии использования")
 
-System_Boundary(libAcc, "API") {
-    Component(concertController, "ConcertController", "C# .NET", " отвечает за обработку входящих запросов")
-    Component(concertRepository, "ConcertRepository", "C# .NET", "отвечает за взаимодействие с базой данных для хранения и извлечения информации")
-    Component(concertService, "ConcertService", "C# .NET", "включает в себя бизнес-логику")
-    Rel(concertMicroservice, concertController, "")
-    Rel(concertController, concertService, "")
-    Rel(concertService, concertRepository, "")
+    Component(concertRepositoryInterface, "IConcertRepository", "Интерфейс", "Абстракция доступа к данным")
+    Component(concertRepository, "ConcertRepository", "C# .NET", "Реализация репозитория")
+    Component(concertEntity, "ConcertEntity", "Класс данных", "Хранение в базе данных")
+    Component(concertDTO, "ConcertDTO", "Класс данных", "Передача данных в/из сервиса")
+    Component(concertDB, "База данных", "PostgreSQL", "Хранение информации о концертах")
+    Component(eventPublisherInterface, "IEventPublisher", "Интерфейс", "Публикация событий")
+    Component(mapServiceInterface, "IMapService", "Интерфейс", "Взаимодействие с картографией")
 }
 
-Component(eventManagementService, "EventManagmentService", "C# .NET", "Управляет событиями, связанными с концертами")
-Rel(concertService, eventManagementService, "")
+Component(mapSystem, "Система картографии", "Внешняя система", "Обработка координат")
+Component(rabbitmq, "RabbitMQ", "Шина сообщений", "Обмен событиями")
 
-Component(notificationService, "NotificationService", "C# .NET", "Отправляет уведомления пользователям о концертах")
-Rel(concertService, notificationService, "")
+Rel(concertController, concertService, "Вызов бизнес-логики", "Dependency Injection")
+Rel(concertService, concertUseCase, "Вызов Use Case")
+Rel(concertUseCase, concertRepositoryInterface, "Доступ к данным через интерфейс")
+Rel(concertUseCase, eventPublisherInterface, "Публикация событий через интерфейс")
+Rel(concertUseCase, mapServiceInterface, "Обращение к картографии")
 
-System_Ext(map_system, "Система картографии", "Предоставление адреса по координатам")
-Rel(concertService, map_system, "")
+Rel(concertRepositoryInterface, concertRepository, "Реализация")
+Rel(concertRepository, concertEntity, "Работа с данными")
+Rel(concertRepository, concertDB, "SQL-запросы")
+Rel(eventPublisherInterface, rabbitmq, "Реализация")
+Rel(mapServiceInterface, mapSystem, "Реализация")
+
+Component(concertMicroservice, "Клиент", "Мобильное приложение")
+Rel(concertMicroservice, concertController, "HTTP запросы", "REST API")
 
 @enduml
