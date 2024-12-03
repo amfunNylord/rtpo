@@ -16,17 +16,18 @@ Person(user, "Пользователь", "Бронирует места, пос�
 
 System_Boundary(concert_system, "Система поиска и резервирования билетов на концерты") {
     Container(web_app, "Мультистраниченое веб-приложение", "React", "", $sprite="react")
+    System_Boundary(services, "Сервисы") {
+        Container(auth_service, "Шлюз авторизации и аутентификации", "C#, .NET", "", $sprite="netmagazine")
+        Container(user_service, "Сервис пользователей", "C#, .NET", "", $sprite="netmagazine")
+        Container(concert_service, "Сервис концертов", "C#, .NET", "", $sprite="netmagazine")
+        Container(booking_service, "Сервис бронирования", "C#, .NET", "", $sprite="netmagazine")
+        Container(payment_service, "Сервис платежей", "C#, .NET", "", $sprite="netmagazine")
+        Container(notification_service, "Сервис уведомлений", "C#, .NET", "", $sprite="netmagazine")
+        Container(analytics_service, "Сервис аналитики", "C#, .NET", "", $sprite="netmagazine")
+        Container(social_integration_service, "Сервис интеграции с социальными сетями", "C#, .NET", "", $sprite="netmagazine")
+    }
+    Container(rabbitmq, "Шина событий", "RabbitMQ", "Обмен сообщениями между сервисами")
     Container(database, "База данных", "PostgreSQL", "", $sprite="postgresql")
-    Container(user_service, "Сервис пользователей", "C#, .NET", "", $sprite="netmagazine")
-    Container(concert_service, "Сервис концертов", "C#, .NET", "", $sprite="netmagazine")
-    Container(booking_service, "Сервис бронирования", "C#, .NET", "", $sprite="netmagazine")
-    Container(payment_service, "Сервис платежей", "C#, .NET", "", $sprite="netmagazine")
-    Container(notification_service, "Сервис уведомлений", "C#, .NET", "", $sprite="netmagazine")
-    Container(analytics_service, "Сервис аналитики", "C#, .NET", "", $sprite="netmagazine")
-    Container(event_management_service, "Сервис управления событиями", "C#, .NET", "", $sprite="netmagazine")
-    Container(social_integration_service, "Сервис интеграции с социальными сетями", "C#, .NET", "", $sprite="netmagazine")
-    Container(auth_service, "Шлюз авторизации и аутентификации", "C#, .NET", "", $sprite="netmagazine")
-    Container(support_service, "Сервис техподдержки", "C#, .NET", "", $sprite="netmagazine")
 }
 
 System_Ext(payment_system, "Платежная система", "Предоставление возможности оплаты")
@@ -38,39 +39,18 @@ Rel(admin, web_app, "Посещает", "HTTP")
 Rel(organizer, web_app, "Посещает", "HTTP")
 Rel(user, web_app, "Посещает", "HTTP")
 
-Rel(web_app, auth_service, "API вызовы", "REST API")
-Rel(web_app, map_system, "Получает данные по карте", "REST API")
+Rel(services, database, "Читает/Пишет данные", "ADO.NET")
+Rel(services, rabbitmq, "Создает/Читает события")
 
-Rel(auth_service, user_service, "API вызовы", "REST API")
-Rel(auth_service, payment_service, "API вызовы", "REST API")
-Rel(auth_service, notification_service, "API вызовы", "REST API")
-Rel(auth_service, analytics_service, "API вызовы", "REST API")
-Rel(auth_service, concert_service, "API вызовы", "REST API")
-Rel(auth_service, support_service, "API вызовы", "REST API")
-Rel(auth_service, social_integration_service, "API вызовы", "REST API")
-Rel(auth_service, database, "Читает/Пишет данные", "ADO.NET")
-Rel(auth_service, email_system, "API вызовы", "REST API")
+concert_service --> map_system : "Получает данные для отображения карты\n[REST API]"
+concert_service ---[hidden]---> map_system 
+notification_service --> email_system : "API вызовы\n[REST API]"
+notification_service ---[hidden]---> email_system 
+payment_service --> payment_system : "API вызовы\n[REST API]"
+payment_service ---[hidden]---> payment_system
+social_integration_service --> socials_system : "API вызовы\n[REST API]"
+social_integration_service ---[hidden]---> socials_system
 
-Rel(analytics_service, database, "Читает/Пишет данные", "ADO.NET")
-
-Rel(notification_service, database, "Читает/Пишет данные", "ADO.NET")
-Rel(notification_service, email_system, "API вызовы", "REST API")
-Rel(notification_service, event_management_service, "API вызовы", "REST API")
-
-Rel(user_service, database, "Читает/Пишет данные", "ADO.NET")
-Rel(user_service, booking_service, "API вызовы", "REST API")
-
-Rel(concert_service, booking_service, "API вызовы", "REST API")
-Rel(concert_service, map_system, "Получает данные для отображения карты", "REST API")
-
-Rel(booking_service, payment_service, "API вызовы", "REST API")
-
-Rel(payment_service, payment_system, "API вызовы", "REST API")
-Rel(payment_service, notification_service, "API вызовы", "REST API")
-
-Rel(social_integration_service, socials_system, "API вызовы", "REST API")
-
-Rel(event_management_service, concert_service, "API вызовы", "REST API")
-Rel(support_service, notification_service, "API вызовы", "REST API")
+Rel(web_app, services, "Создает/Читает события")
 
 @enduml
