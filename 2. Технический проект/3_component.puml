@@ -7,33 +7,37 @@ title C4. Компонент
 System_Boundary(ConcertService_Boundary, "API Сервиса концертов") {
     Component(concertController, "ConcertController", "C# .NET", "Обработка запросов")
     Component(concertService, "ConcertService", "C# .NET", "Бизнес-логика")
-    Component(concertUseCase, "ConcertUseCase", "C# .NET", "Сценарии использования")
+    Component(concertFactory, "ConcertFactory", "C# .NET", "Сценарии использования")
 
     Component(concertRepositoryInterface, "IConcertRepository", "Интерфейс", "Абстракция доступа к данным")
     Component(concertRepository, "ConcertRepository", "C# .NET", "Реализация репозитория")
     Component(concertEntity, "ConcertEntity", "Класс данных", "Хранение в базе данных")
     Component(concertDTO, "ConcertDTO", "Класс данных", "Передача данных в/из сервиса")
-    Component(concertDB, "База данных", "PostgreSQL", "Хранение информации о концертах")
     Component(eventPublisherInterface, "IEventPublisher", "Интерфейс", "Публикация событий")
     Component(mapServiceInterface, "IMapService", "Интерфейс", "Взаимодействие с картографией")
+    Component(eventPublisher, "EventPublisher", "C# .NET", "Реализация IEventPublisher")
+    Component(mapService, "MapService", "C# .NET", "Реализация IMapService")
 }
-
-Component(mapSystem, "Система картографии", "Внешняя система", "Обработка координат")
-Component(rabbitmq, "RabbitMQ", "Шина сообщений", "Обмен событиями")
+Container(concertDB, "База данных", "PostgreSQL", "Хранение информации о концертах")
+System_Ext(mapSystem, "Система картографии", "Обработка координат")
+Container(rabbitmq, "RabbitMQ", "Шина сообщений", "Обмен событиями")
 
 Rel(concertController, concertService, "Вызов бизнес-логики", "Dependency Injection")
-Rel(concertService, concertUseCase, "Вызов Use Case")
-Rel(concertUseCase, concertRepositoryInterface, "Доступ к данным через интерфейс")
-Rel(concertUseCase, eventPublisherInterface, "Публикация событий через интерфейс")
-Rel(concertUseCase, mapServiceInterface, "Обращение к картографии")
+Rel(concertService, concertFactory, "Вызов Use Case")
+Rel(concertFactory, concertRepositoryInterface, "Доступ к данным через интерфейс")
+Rel(concertFactory, eventPublisherInterface, "Публикация событий через интерфейс")
+Rel(concertFactory, mapServiceInterface, "Обращение к картографии")
 
-Rel(concertRepositoryInterface, concertRepository, "Реализация")
+Rel_U(concertRepository, concertRepositoryInterface, "Реализация")
 Rel(concertRepository, concertEntity, "Работа с данными")
 Rel(concertRepository, concertDB, "SQL-запросы")
-Rel(eventPublisherInterface, rabbitmq, "Реализация")
-Rel(mapServiceInterface, mapSystem, "Реализация")
 
 Component(concertMicroservice, "Клиент", "Мобильное приложение")
 Rel(concertMicroservice, concertController, "HTTP запросы", "REST API")
+
+Rel_U(eventPublisher, eventPublisherInterface, "Реализация")
+Rel(eventPublisher, rabbitmq, "Обращается")
+Rel_U(mapService, mapServiceInterface, "Реализация")
+Rel(mapService, mapSystem, "Обращается")
 
 @enduml

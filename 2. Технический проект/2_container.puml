@@ -1,4 +1,5 @@
 @startuml C4. Контейнеры
+left to right direction
 
 title C4. Контейнеры
 
@@ -42,13 +43,13 @@ Rel(user, web_app, "Посещает", "HTTP")
 Rel(services, database, "Читает/Пишет данные", "ADO.NET")
 Rel(services, rabbitmq, "Создает/Читает события")
 
-concert_service --> map_system : "Получает данные для отображения карты\n[REST API]"
+concert_service --> map_system : "Получает данные для отображения карты\n[REST API]\n(Сервис концертов)"
 concert_service ---[hidden]---> map_system 
-notification_service --> email_system : "API вызовы\n[REST API]"
+notification_service --> email_system : "API вызовы\n[REST API]\n(Сервис уведомлений)"
 notification_service ---[hidden]---> email_system 
-payment_service --> payment_system : "API вызовы\n[REST API]"
+payment_service --> payment_system : "API вызовы\n[REST API]\n(Сервис платежей)"
 payment_service ---[hidden]---> payment_system
-social_integration_service --> socials_system : "API вызовы\n[REST API]"
+social_integration_service --> socials_system : "API вызовы\n[REST API](Сервис интеграции с социальными сетями)"
 social_integration_service ---[hidden]---> socials_system
 
 Rel(web_app, services, "Создает/Читает события")
