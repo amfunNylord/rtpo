@@ -1,0 +1,74 @@
+@startuml C4 Infrastructure Diagram - Система поиска и бронирования билетов
+!define C4P https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master
+!includeurl C4P/C4_Container.puml
+
+title C4 Infrastructure Diagram - Система поиска и бронирования билетов
+
+package "Облачная инфраструктура" as cloud {
+    Container(nginx, "Nginx", "Nginx", "Обратный прокси и балансировщик нагрузки")
+
+    package "Kubernetes Cluster" as k8s_cluster {
+        package "Auth Pod" as auth_pod {
+            Container(auth_service, "Auth Service", "C#, .NET", "Сервис авторизации и аутентификации")
+        }
+
+        package "Booking Pod" as booking_pod {
+            Container(booking_service, "Booking Service", "C#, .NET", "Сервис управления бронированиями")
+        }
+
+        package "Concert Pod" as concert_pod {
+            Container(concert_service, "Concert Service", "C#, .NET", "Сервис управления концертами")
+        }
+
+        package "Payment Pod" as payment_pod {
+            Container(payment_service, "Payment Service", "C#, .NET", "Сервис обработки платежей")
+        }
+
+        package "Notification Pod" as notification_pod {
+            Container(notification_service, "Notification Service", "C#, .NET", "Сервис уведомлений")
+        }
+
+        package "Analytics Pod" as analytics_pod {
+            Container(analytics_service, "Analytics Service", "C#, .NET", "Сервис аналитики и отчетности")
+        }
+
+        package "Social Integration Pod" as social_integration_pod {
+            Container(social_integration_service, "Social Integration Service", "C#, .NET", "Сервис интеграции с социальными сетями")
+        }
+
+        package "User Pod" as user_pod {
+            Container(user_service, "User Service", "C#, .NET", "Сервис управления пользователями")
+        }
+    }
+
+    Container(rabbitmq, "Шина событий", "RabbitMQ", "Обмен сообщениями между сервисами")
+}
+
+package "Database Cluster" as database {
+    Container(database_master, "PostgreSQL Master", "PostgreSQL", "Основная база данных")
+    Container(database_replica, "PostgreSQL Replica", "PostgreSQL", "Реплика базы данных для чтения")
+}
+
+System_Ext(payment_system, "Платежная система", "Stripe API")
+System_Ext(map_system, "Система картографии", "Maps API")
+System_Ext(email_system, "Email сервис", "Mailgun API")
+System_Ext(socials_system, "Социальные сети", "API для продвижения концертов")
+
+' Соединения между сервисами
+Rel(k8s_cluster, database, "Чтение/Запись данных", "ADO.NET")
+Rel_D(database_master, database_replica, "Репликация данных", "Streaming")
+
+' Взаимодействие с внешними системами
+Rel(concert_service, map_system, "Запрос данных для отображения карты", "REST API")
+Rel(notification_service, email_system, "Отправка уведомлений о заказах", "REST API")
+Rel(payment_service, payment_system, "Обработка платежей", "REST API")
+Rel(social_integration_service, socials_system, "Публикация информации о концертах", "REST API")
+
+' Взаимодействие RabbitMQ
+Rel(booking_service, rabbitmq, "Публикация событий бронирования")
+Rel(notification_service, rabbitmq, "Обработка событий о бронировании")
+
+' Балансировка нагрузки
+Rel(nginx, k8s_cluster, "Проксирование запросов", "HTTP")
+
+@enduml
