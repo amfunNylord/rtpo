@@ -1,74 +1,85 @@
-@startuml C4 Infrastructure Diagram - Система поиска и бронирования билетов
-!define C4P https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master
-!includeurl C4P/C4_Container.puml
+@startuml maintenance
+!theme vibrant
 
-title C4 Infrastructure Diagram - Система поиска и бронирования билетов
+package "AWS Kubernetes" as k8s {
+  [Docker] as docker << (C, #FFAAAA) >>
+  [Containers] as containers << (C, #FFAAAA) >>
+}
 
-package "Облачная инфраструктура" as cloud {
-    Container(nginx, "Nginx", "Nginx", "Обратный прокси и балансировщик нагрузки")
+package "Система бронирования билетов - обслуживание" as maintenance {
+    actor "Системный администратор" as sys_admin
+    package "AWS" as cloud {
+      [Система мониторинга CloudWatch] as monitoring_service << (C, #FFAAAA) >>
+      [Система бэкапов AWS Backup] as backup_service << (C, #FFAAAA) >>
+    }
+}
 
-    package "Kubernetes Cluster" as k8s_cluster {
-        package "Auth Pod" as auth_pod {
-            Container(auth_service, "Auth Service", "C#, .NET", "Сервис авторизации и аутентификации")
-        }
+package "Внешние сервисы" as outer_services {
+    package "Канал уведомлений" as notifications {
+        [Почтовый шлюз AWS SES] as email_service << (C, #FFAAAA) >>
+    }
+}
 
-        package "Booking Pod" as booking_pod {
-            Container(booking_service, "Booking Service", "C#, .NET", "Сервис управления бронированиями")
-        }
-
-        package "Concert Pod" as concert_pod {
-            Container(concert_service, "Concert Service", "C#, .NET", "Сервис управления концертами")
-        }
-
-        package "Payment Pod" as payment_pod {
-            Container(payment_service, "Payment Service", "C#, .NET", "Сервис обработки платежей")
-        }
-
-        package "Notification Pod" as notification_pod {
-            Container(notification_service, "Notification Service", "C#, .NET", "Сервис уведомлений")
-        }
-
-        package "Analytics Pod" as analytics_pod {
-            Container(analytics_service, "Analytics Service", "C#, .NET", "Сервис аналитики и отчетности")
-        }
-
-        package "Social Integration Pod" as social_integration_pod {
-            Container(social_integration_service, "Social Integration Service", "C#, .NET", "Сервис интеграции с социальными сетями")
-        }
-
-        package "User Pod" as user_pod {
-            Container(user_service, "User Service", "C#, .NET", "Сервис управления пользователями")
-        }
+package "Разработка" as development {
+    actor "Разработчик" as developer
+    [Система контроля версий (Git GitLab)] as vcs << (C, #FFAAAA) >>
+    
+    package "CI/CD GitLab" as cicd {
+      [CI/CD GitLab (Ветка prod)] as cicd_prod << (C, #FFAAAA) >>
+      [CI/CD GitLab (Ветка qa)] as cicd_qa << (C, #FFAAAA) >>
+      [CI/CD GitLab (Ветка dev)] as cicd_dev << (C, #FFAAAA) >>
+    }
+    
+    package "CI/CD Pipeline (PROD)" as build_prod {
+      [Build Stage] as buildstage_prod << (C, #FFAAAA) >>
+      [Testing Stage] as testingstage_prod << (C, #FFAAAA) >>
+    }
+    
+    package "CI/CD Pipeline (QA)" as build_qa {
+      [Build Stage QA] as buildstage_qa << (C, #FFAAAA) >>
+      [Testing Stage QA] as testingstage_qa << (C, #FFAAAA) >>
+    }
+    
+    package "CI/CD Pipeline (DEV)" as build_dev {
+      [Build Stage DEV] as buildstage_dev << (C, #FFAAAA) >>
+      [Testing Stage DEV] as testingstage_dev << (C, #FFAAAA) >>
     }
 
-    Container(rabbitmq, "Шина событий", "RabbitMQ", "Обмен сообщениями между сервисами")
+    [Реестр контейнеров GitLab] as containeregistry << (C, #FFAAAA) >>
 }
 
-package "Database Cluster" as database {
-    Container(database_master, "PostgreSQL Master", "PostgreSQL", "Основная база данных")
-    Container(database_replica, "PostgreSQL Replica", "PostgreSQL", "Реплика базы данных для чтения")
-}
+sys_admin --> monitoring_service : "Мониторинг состояния системы"
+sys_admin --> backup_service : "Контроль и восстановление данных"
+monitoring_service --> email_service : "Уведомления о сбоях и предупреждениях"
+developer --> vcs : "PUSH коммитов"
+vcs --> cicd_prod : "CI/CD для PROD"
+vcs --> cicd_qa : "CI/CD для QA"
+vcs --> cicd_dev : "CI/CD для DEV"
 
-System_Ext(payment_system, "Платежная система", "Stripe API")
-System_Ext(map_system, "Система картографии", "Maps API")
-System_Ext(email_system, "Email сервис", "Mailgun API")
-System_Ext(socials_system, "Социальные сети", "API для продвижения концертов")
+cicd_prod --> buildstage_prod : "Запуск pipeline"
+cicd_qa --> buildstage_qa : "Запуск pipeline"
+cicd_dev --> buildstage_dev : "Запуск pipeline"
 
-' Соединения между сервисами
-Rel(k8s_cluster, database, "Чтение/Запись данных", "ADO.NET")
-Rel_D(database_master, database_replica, "Репликация данных", "Streaming")
+buildstage_prod --> containeregistry : "Сборка Docker-образов и PUSH"
+buildstage_qa --> containeregistry : "Сборка Docker-образов и PUSH"
+buildstage_dev --> containeregistry : "Сборка Docker-образов и PUSH"
 
-' Взаимодействие с внешними системами
-Rel(concert_service, map_system, "Запрос данных для отображения карты", "REST API")
-Rel(notification_service, email_system, "Отправка уведомлений о заказах", "REST API")
-Rel(payment_service, payment_system, "Обработка платежей", "REST API")
-Rel(social_integration_service, socials_system, "Публикация информации о концертах", "REST API")
+containeregistry <-- testingstage_prod : "PULL Docker-образов"
+containeregistry <-- testingstage_qa : "PULL Docker-образов"
+containeregistry <-- testingstage_dev : "PULL Docker-образов"
 
-' Взаимодействие RabbitMQ
-Rel(booking_service, rabbitmq, "Публикация событий бронирования")
-Rel(notification_service, rabbitmq, "Обработка событий о бронировании")
+buildstage_prod --> testingstage_prod : "PASS"
+buildstage_qa --> testingstage_qa : "PASS"
+buildstage_dev --> testingstage_dev : "PASS"
 
-' Балансировка нагрузки
-Rel(nginx, k8s_cluster, "Проксирование запросов", "HTTP")
+testingstage_prod --> docker : "PULL обновлений [SSH] (Тэг prod)"
+testingstage_qa --> docker : "PULL обновлений [SSH] (Тэг qa)"
+testingstage_dev --> docker : "PULL обновлений [SSH] (Тэг dev)"
+
+docker --> containeregistry : "PULL Docker-образов"
+docker --> containers : "Обновление и развёртка контейнеров"
+
+monitoring_service --> containers : "Проверка состояния"
+backup_service --> containers : "Создание и восстановление бэкапов"
 
 @enduml
